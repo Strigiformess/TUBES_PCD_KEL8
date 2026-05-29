@@ -20,9 +20,7 @@ android {
     // PERBAIKAN: Ganti kotlin { jvmToolchain(17) } dengan kotlinOptions
     // agar Java dan Kotlin target sama persis (tidak konflik dengan tflite_flutter)
     kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(<JavaVersion.VERSION_17>))
-        }
+        jvmToolchain(17)
     }
 
     defaultConfig {
