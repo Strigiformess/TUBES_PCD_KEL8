@@ -20,7 +20,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     await Future.delayed(const Duration(seconds: 1)); // Simulasi jepret
     
     // PERBAIKAN: Kita ganti File menjadi String (path palsu/dummy)
-    final String dummyPath = 'dummy_image_path.jpg';
+    const String dummyPath = 'dummy_image_path.jpg';
     
     if (!mounted) return;
     
@@ -47,7 +47,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: [BoxShadow(color: AppTheme.primaryLight.withOpacity(0.5), blurRadius: 20)],
+                boxShadow: [BoxShadow(color: AppTheme.primaryLight.withValues(alpha:0.5), blurRadius: 20)],
               ),
               child: Stack(
                 alignment: Alignment.center,

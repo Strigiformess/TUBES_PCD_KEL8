@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/user_model.dart';
 import '../models/department_model.dart';
 import 'db_service.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   static const _userCol = 'users';
@@ -76,7 +77,7 @@ class AuthService {
     await DbService.getDb();
     final col = DbService.getCollection(_deptCol);
     final docs = await col.find().toList();
-  print('Semua data tanpa filter: $docs');
+  debugPrint('Semua data tanpa filter: $docs');
     return docs.map((d) => DepartmentModel.fromMap(d)).toList();
   } catch (e) {
     return [];

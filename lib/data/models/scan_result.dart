@@ -1,5 +1,3 @@
-import 'dart:io';
-
 class ScanResult {
   final String id;
   final String imagePath; // Diubah menjadi String agar aman di Web
@@ -13,7 +11,7 @@ class ScanResult {
 
   ScanResult({
     required this.id,
-    required this.imagePath, // Sesuaikan di sini
+    required this.imagePath, 
     required this.foodType,
     required this.freshnessScore,
     required this.status,
