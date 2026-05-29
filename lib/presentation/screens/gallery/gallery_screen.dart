@@ -57,7 +57,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentYellow.withValues(alpha:0.3),
+                  color: AppTheme.surface.withValues(alpha:0.3),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.photo_library_rounded, size: 80, color: AppTheme.textPrimary),

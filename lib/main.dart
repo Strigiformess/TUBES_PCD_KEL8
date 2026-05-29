@@ -16,7 +16,7 @@ class FreshCheckApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'FreshCheck PCD',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.light,
       routerConfig: appRouter,
     );
   }

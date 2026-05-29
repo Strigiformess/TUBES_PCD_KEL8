@@ -18,7 +18,7 @@ class ScanCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryLight.withValues(alpha: 0.4),
+            color: AppTheme.primary.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 4),
           )
