@@ -1,76 +1,53 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  AppTheme._();
+  // Palet Warna Aesthetic & Lucu
+  static const Color primary = Color(0xFFFFB6C1);       // Soft Pink
+  static const Color primaryLight = Color(0xFFFFE4E1);  // Baby Pink
+  static const Color accentBlue = Color(0xFFAEC6CF);    // Soft Blue
+  static const Color accentYellow = Color(0xFFFDFD96);  // Soft Yellow
+  static const Color background = Color(0xFFFFFDD0);    // Cream
+  static const Color surface = Color(0xFFFFFFFF);       // White
+  
+  // Status Kesegaran (Pastel Tone)
+  static const Color excellent = Color(0xFFA8E6CF);     // Soft Pastel Green
+  static const Color moderate = Color(0xFFFFDAB9);      // Peach / Soft Orange
+  static const Color poor = Color(0xFFFFAAA5);          // Soft Pastel Red
 
-  // ── Brand Colors ────────────────────────────────────────────────────────
-  static const Color primary      = Color(0xFF2ECC71);
-  static const Color primaryDark  = Color(0xFF27AE60);
-  static const Color surface      = Color(0xFFF8FAF8);
-  static const Color cardBg       = Color(0xFFFFFFFF);
-  static const Color textPrimary  = Color(0xFF1A1A2E);
-  static const Color textSecondary= Color(0xFF8A9BB0);
+  static const Color textPrimary = Color(0xFF5D5D5D);
+  static const Color textSecondary = Color(0xFF9E9E9E);
 
-  // ── Freshness Status Colors ──────────────────────────────────────────────
-  static const Color fresh        = Color(0xFF2ECC71);  // hijau
-  static const Color medium       = Color(0xFFF39C12);  // oranye
-  static const Color poor         = Color(0xFFE74C3C);  // merah
-
-  // ── Semantic ─────────────────────────────────────────────────────────────
-  static Color statusColor(FreshnessStatus status) => switch (status) {
-    FreshnessStatus.fresh  => fresh,
-    FreshnessStatus.medium => medium,
-    FreshnessStatus.poor   => poor,
-  };
-
-  static ThemeData get light => ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primary,
-      surface: surface,
-    ),
-    scaffoldBackgroundColor: surface,
-    fontFamily: 'Poppins',
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      titleTextStyle: TextStyle(
-        color: textPrimary,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        fontFamily: 'Poppins',
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      scaffoldBackgroundColor: background,
+      colorScheme: const ColorScheme.light(
+        primary: primary,
+        secondary: primaryLight,
+        surface: surface,
       ),
-      iconTheme: IconThemeData(color: textPrimary),
-    ),
-    cardTheme: CardThemeData(
-      color: cardBg,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-          fontFamily: 'Poppins',
+      fontFamily: 'Nunito', // Anda bisa ganti dengan font pilihan kelompok
+      appBarTheme: const AppBarTheme(
+        backgroundColor: surface,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: textPrimary),
+        titleTextStyle: TextStyle(
+          color: textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
         ),
       ),
-    ),
-  );
-}
-
-enum FreshnessStatus { fresh, medium, poor }
-
-extension FreshnessStatusX on FreshnessStatus {
-  String get label => switch (this) {
-    FreshnessStatus.fresh  => 'Fresh',
-    FreshnessStatus.medium => 'Medium',
-    FreshnessStatus.poor   => 'Poor',
-  };
-
-  Color get color => AppTheme.statusColor(this);
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ),
+    );
+  }
 }
