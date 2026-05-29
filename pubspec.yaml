@@ -9,53 +9,94 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # State Management
   flutter_riverpod: ^2.4.9
   riverpod_annotation: ^2.3.3
-
-  # Navigation
   go_router: ^13.0.0
-
-  # Camera
   camera: ^0.10.5+9
   image_picker: ^1.2.2
-
-  # ML Kit - Image Labeling
   google_mlkit_image_labeling: ^0.11.0
-
-  # TFLite - Custom freshness model
   tflite_flutter: ^0.10.4
-
-  # Image Processing
   image: ^4.1.7
-
-  # Local Storage (scan history)
   hive_flutter: ^1.1.0
   hive: ^2.2.3
-
-  # Utilities
   path_provider: ^2.1.2
   intl: ^0.19.0
   uuid: ^4.3.3
   permission_handler: ^11.3.0
-
-  # UI
   flutter_animate: ^4.5.0
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
-  iconsax: ^0.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   build_runner: ^2.4.8
-  riverpod_generator: ^2.3.9
   hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true
   assets:
-    # - assets/models/
     - assets/labels/
+
+# name: freshcheck
+# description: Sistem Analisis Tingkat Kesegaran Makanan Berbasis Computer Vision
+# publish_to: 'none'
+# version: 1.0.0+1
+
+# environment:
+#   sdk: '>=3.0.0 <4.0.0'
+
+# dependencies:
+#   flutter:
+#     sdk: flutter
+
+#   # State Management
+#   flutter_riverpod: ^2.4.9
+#   riverpod_annotation: ^2.3.3
+
+#   # Navigation
+#   go_router: ^13.0.0
+
+#   # Camera
+#   camera: ^0.10.5+9
+#   image_picker: ^1.2.2
+
+#   # ML Kit - Image Labeling
+#   google_mlkit_image_labeling: ^0.11.0
+
+#   # TFLite - Custom freshness model
+#   tflite_flutter: ^0.10.4
+
+#   # Image Processing
+#   image: ^4.1.7
+
+#   # Local Storage (scan history)
+#   hive_flutter: ^1.1.0
+#   hive: ^2.2.3
+
+#   # Utilities
+#   path_provider: ^2.1.2
+#   intl: ^0.19.0
+#   uuid: ^4.3.3
+#   permission_handler: ^11.3.0
+
+#   # UI
+#   flutter_animate: ^4.5.0
+#   cached_network_image: ^3.3.1
+#   shimmer: ^3.0.0
+#   iconsax: ^0.0.8
+
+# dev_dependencies:
+#   flutter_test:
+#     sdk: flutter
+#   flutter_lints: ^3.0.0
+#   build_runner: ^2.4.8
+#   riverpod_generator: ^2.3.9
+#   hive_generator: ^2.0.1
+
+# flutter:
+#   uses-material-design: true
+#   assets:
+#     # - assets/models/
+#     - assets/labels/
