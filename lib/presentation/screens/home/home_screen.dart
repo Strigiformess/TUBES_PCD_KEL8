@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primaryLight,
+                color: AppTheme.primary.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(28),
               ),
               child: Column(
@@ -55,7 +55,7 @@ class HomeScreen extends StatelessWidget {
                     context,
                     title: "Kamera",
                     icon: Icons.camera_alt_rounded,
-                    cardColor: AppTheme.accentBlue,
+                    cardColor: AppTheme.surface,
                     route: '/camera',
                   ),
                 ),
@@ -65,7 +65,7 @@ class HomeScreen extends StatelessWidget {
                     context,
                     title: "Galeri",
                     icon: Icons.photo_library_rounded,
-                    cardColor: AppTheme.accentYellow,
+                    cardColor: AppTheme.surface,
                     route: '/gallery',
                   ),
                 ),

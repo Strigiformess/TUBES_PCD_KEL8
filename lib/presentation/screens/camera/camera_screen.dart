@@ -47,7 +47,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: [BoxShadow(color: AppTheme.primaryLight.withValues(alpha:0.5), blurRadius: 20)],
+                boxShadow: [BoxShadow(color: AppTheme.primary.withValues(alpha:0.5), blurRadius: 20)],
               ),
               child: Stack(
                 alignment: Alignment.center,

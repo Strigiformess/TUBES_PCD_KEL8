@@ -21,7 +21,7 @@ class DetailScreen extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: [BoxShadow(color: AppTheme.primaryLight.withValues(alpha:0.5), blurRadius: 20, offset: const Offset(0, 10))],
+                boxShadow: [BoxShadow(color: AppTheme.primary.withValues(alpha:0.5), blurRadius: 20, offset: const Offset(0, 10))],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
@@ -39,7 +39,7 @@ class DetailScreen extends StatelessWidget {
                 Text(scan.foodType, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(color: AppTheme.excellent, borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: AppTheme.fresh, borderRadius: BorderRadius.circular(20)),
                   child: Text(scan.status, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
@@ -63,7 +63,7 @@ class DetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: AppTheme.primaryLight.withValues(alpha:0.3), borderRadius: BorderRadius.circular(24)),
+              decoration: BoxDecoration(color: AppTheme.primary.withValues(alpha:0.3), borderRadius: BorderRadius.circular(24)),
               child: Column(
                 children: scan.pcdMetrics.entries.map((e) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
