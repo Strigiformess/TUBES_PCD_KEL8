@@ -11,14 +11,15 @@ class FreshnessBadge extends StatelessWidget {
     Color bgColor;
     Color textColor;
 
-    if (status.contains('Sangat')) {
-      bgColor = AppTheme.fresh.withValues(alpha:0.2);
+    // Menggunakan variabel statusFresh, statusMedium, dan statusPoor dari AppTheme
+    if (status.contains('Sangat') || status.contains('Segar')) {
+      bgColor = AppTheme.statusFresh.withValues(alpha: 0.2);
       textColor = const Color(0xFF2E7D32); // Dark Green
-    } else if (status.contains('Cukup')) {
-      bgColor = AppTheme.medium.withValues(alpha:0.3);
+    } else if (status.contains('Cukup') || status.contains('Sedang')) {
+      bgColor = AppTheme.statusMedium.withValues(alpha: 0.3);
       textColor = const Color(0xFFE65100); // Dark Orange
     } else {
-      bgColor = AppTheme.poor.withValues(alpha:0.2);
+      bgColor = AppTheme.statusPoor.withValues(alpha: 0.2);
       textColor = const Color(0xFFC62828); // Dark Red
     }
 
@@ -30,7 +31,11 @@ class FreshnessBadge extends StatelessWidget {
       ),
       child: Text(
         status,
-        style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12),
+        style: TextStyle(
+          color: textColor, 
+          fontWeight: FontWeight.bold, 
+          fontSize: 12,
+        ),
       ),
     );
   }

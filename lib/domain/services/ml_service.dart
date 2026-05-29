@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import '../../core/config/app_config.dart';
-import '../../data/models/scan_result.dart';
+//import '../../data/models/scan_result.dart';
 import 'image_processor.dart';
 
 /// Hasil analisis gabungan ML Kit + TFLite

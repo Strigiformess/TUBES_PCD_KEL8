@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'app.dart';
-import 'core/theme/app_theme.dart';
+// Pastikan import ini ditambahkan:
+import 'presentation/router/app_router.dart'; 
+// Import file theme kamu di sini juga
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: FreshCheckApp()));
+  runApp(MyApp());
 }
 
-class FreshCheckApp extends StatelessWidget {
-  const FreshCheckApp({super.key});
+class MyApp extends StatelessWidget {
+  // 1. Inisialisasi appRouter di sini
+  final AppRouter appRouter = AppRouter();
+
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'FreshCheck PCD',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      routerConfig: appRouter,
+    return MaterialApp(
+      title: 'Tubes PCD Kel 8',
+      // Memanggil theme yang sudah kita tambahkan palet warnanya tadi
+      // theme: AppTheme.lightTheme, 
+      
+      // 2. Sambungkan routing-nya di sini
+      onGenerateRoute: appRouter.onGenerateRoute, 
     );
   }
 }
