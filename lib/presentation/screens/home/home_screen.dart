@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     "Deteksi kualitas buah dan sayur menggunakan Pengolahan Citra Digital.",
-                    style: TextStyle(fontSize: 14, color: AppTheme.textPrimary.withOpacity(0.7), height: 1.4),
+                    style: TextStyle(fontSize: 14, color: AppTheme.textPrimary.withValues(alpha:0.7), height: 1.4),
                   ),
                 ],
               ),
@@ -83,7 +83,7 @@ class HomeScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
-          color: cardColor.withOpacity(0.4),
+          color: cardColor.withValues(alpha:0.4),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(

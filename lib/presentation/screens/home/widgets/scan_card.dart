@@ -1,3 +1,4 @@
+import 'dart:io'; // Tambahan wajib untuk menggunakan widget File()
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/models/scan_result.dart';
@@ -17,7 +18,7 @@ class ScanCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryLight.withOpacity(0.4),
+            color: AppTheme.primaryLight.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 4),
           )
@@ -27,16 +28,27 @@ class ScanCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.file(scan.imageFile, width: 64, height: 64, fit: BoxFit.cover),
+            child: Image.file(
+              File(scan.imagePath), // Diperbaiki: Hapus kata 'dart' dan ubah 'scanResult' menjadi 'scan'
+              width: 64, 
+              height: 64, 
+              fit: BoxFit.cover
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(scan.foodType, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary)),
+                Text(
+                  scan.foodType, 
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary)
+                ),
                 const SizedBox(height: 4),
-                Text("${scan.freshnessScore}% Segar", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                Text(
+                  "${scan.freshnessScore}% Segar", 
+                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)
+                ),
               ],
             ),
           ),

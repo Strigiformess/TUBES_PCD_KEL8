@@ -57,7 +57,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentYellow.withOpacity(0.3),
+                  color: AppTheme.accentYellow.withValues(alpha:0.3),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.photo_library_rounded, size: 80, color: AppTheme.textPrimary),
@@ -71,7 +71,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               Text(
                 "Pilih gambar buah atau sayur dari galeri HP untuk mulai mengekstrak warna dan menganalisis kesegarannya.",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: AppTheme.textPrimary.withOpacity(0.7), height: 1.5),
+                style: TextStyle(fontSize: 14, color: AppTheme.textPrimary.withValues(alpha:0.7), height: 1.5),
               ),
               const SizedBox(height: 40),
               

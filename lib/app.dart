@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+//import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import './data/models/scan_result.dart';
 import './presentation/screens/home/home_screen.dart';
+import 'data/models/scan_result.dart';
 import './presentation/screens/camera/camera_screen.dart';
 import './presentation/screens/detail/detail_screen.dart';
 import './presentation/screens/gallery/gallery_screen.dart';

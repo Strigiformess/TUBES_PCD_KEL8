@@ -21,7 +21,7 @@ class DetailScreen extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: [BoxShadow(color: AppTheme.primaryLight.withOpacity(0.5), blurRadius: 20, offset: const Offset(0, 10))],
+                boxShadow: [BoxShadow(color: AppTheme.primaryLight.withValues(alpha:0.5), blurRadius: 20, offset: const Offset(0, 10))],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
@@ -63,7 +63,7 @@ class DetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: AppTheme.primaryLight.withOpacity(0.3), borderRadius: BorderRadius.circular(24)),
+              decoration: BoxDecoration(color: AppTheme.primaryLight.withValues(alpha:0.3), borderRadius: BorderRadius.circular(24)),
               child: Column(
                 children: scan.pcdMetrics.entries.map((e) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),

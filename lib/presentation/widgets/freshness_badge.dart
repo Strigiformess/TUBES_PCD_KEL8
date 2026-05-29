@@ -12,13 +12,13 @@ class FreshnessBadge extends StatelessWidget {
     Color textColor;
 
     if (status.contains('Sangat')) {
-      bgColor = AppTheme.excellent.withOpacity(0.2);
+      bgColor = AppTheme.excellent.withValues(alpha:0.2);
       textColor = const Color(0xFF2E7D32); // Dark Green
     } else if (status.contains('Cukup')) {
-      bgColor = AppTheme.moderate.withOpacity(0.3);
+      bgColor = AppTheme.moderate.withValues(alpha:0.3);
       textColor = const Color(0xFFE65100); // Dark Orange
     } else {
-      bgColor = AppTheme.poor.withOpacity(0.2);
+      bgColor = AppTheme.poor.withValues(alpha:0.2);
       textColor = const Color(0xFFC62828); // Dark Red
     }
 
