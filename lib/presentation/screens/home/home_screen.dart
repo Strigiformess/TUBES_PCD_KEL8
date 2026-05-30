@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -67,7 +68,7 @@ class HomeScreen extends StatelessWidget {
                     title: "Kamera",
                     icon: Icons.camera_alt_rounded,
                     cardColor: AppTheme.surface,
-                    route: '/camera',
+                    routeName: 'camera',
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -77,7 +78,7 @@ class HomeScreen extends StatelessWidget {
                     title: "Galeri",
                     icon: Icons.photo_library_rounded,
                     cardColor: AppTheme.surface,
-                    route: '/gallery', // Pastikan route ini ada di app_router.dart nanti
+                    routeName: 'gallery',
                   ),
                 ),
               ],
@@ -88,10 +89,16 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, {required String title, required IconData icon, required Color cardColor, required String route}) {
+  Widget _buildMenuCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color cardColor,
+    required String routeName,
+  }) {
     return GestureDetector(
-      // Menggunakan navigasi bawaan Flutter agar sesuai dengan AppRouter
-      onTap: () => Navigator.pushNamed(context, route),
+      // ✅ Gunakan go_router bukan Navigator.pushNamed
+      onTap: () => context.pushNamed(routeName),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
