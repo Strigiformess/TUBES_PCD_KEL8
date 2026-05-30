@@ -19,7 +19,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     setState(() => _isProcessing = true);
     await Future.delayed(const Duration(seconds: 1)); // Simulasi jepret
     
-    // PERBAIKAN: Kita ganti File menjadi String (path palsu/dummy)
+    // ✅ Ganti File menjadi String (path palsu/dummy)
     const String dummyPath = 'dummy_image_path.jpg';
     
     if (!mounted) return;
@@ -30,7 +30,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     if (!mounted) return;
     final state = ref.read(scanStateProvider);
     if (state is ScanSuccess) {
-      context.pushReplacement('/detail', extra: state.result);
+      // ✅ Gunakan go_router bukan context.pushReplacement
+      context.pushReplacementNamed('detail', extra: state.result);
     }
   }
 
@@ -94,6 +95,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
             left: 20,
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, color: AppTheme.textPrimary),
+              // ✅ Gunakan go_router bukan context.pop
               onPressed: () => context.pop(),
             ),
           )
