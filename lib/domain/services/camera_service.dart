@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import '../../core/config/app_config.dart';
+//import '../../core/config/app_config.dart';
 
 /// CameraService — mengelola lifecycle CameraController secara aman.
 ///

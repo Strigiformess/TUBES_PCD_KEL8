@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha:0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(28),
               ),
               child: Column(
@@ -30,12 +30,20 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Cek Kesegaran Makananmu!",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                    style: TextStyle(
+                      fontSize: 20, 
+                      fontWeight: FontWeight.bold, 
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     "Deteksi kualitas buah dan sayur menggunakan Pengolahan Citra Digital.",
-                    style: TextStyle(fontSize: 14, color: AppTheme.textPrimary.withValues(alpha:0.7), height: 1.4),
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: AppTheme.textPrimary.withValues(alpha: 0.7), 
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),
@@ -44,7 +52,11 @@ class HomeScreen extends StatelessWidget {
             
             const Text(
               "Menu Utama",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+              style: TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold, 
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -56,7 +68,7 @@ class HomeScreen extends StatelessWidget {
                     title: "Kamera",
                     icon: Icons.camera_alt_rounded,
                     cardColor: AppTheme.surface,
-                    route: '/camera',
+                    routeName: 'camera',
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -66,7 +78,7 @@ class HomeScreen extends StatelessWidget {
                     title: "Galeri",
                     icon: Icons.photo_library_rounded,
                     cardColor: AppTheme.surface,
-                    route: '/gallery',
+                    routeName: 'gallery',
                   ),
                 ),
               ],
@@ -77,24 +89,41 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, {required String title, required IconData icon, required Color cardColor, required String route}) {
+  Widget _buildMenuCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color cardColor,
+    required String routeName,
+  }) {
     return GestureDetector(
-      onTap: () => context.push(route),
+      // ✅ Gunakan go_router bukan Navigator.pushNamed
+      onTap: () => context.pushNamed(routeName),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
-          color: cardColor.withValues(alpha:0.4),
+          color: cardColor.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: Colors.white, 
+                shape: BoxShape.circle,
+              ),
               child: Icon(icon, color: AppTheme.textPrimary, size: 32),
             ),
             const SizedBox(height: 16),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary)),
+            Text(
+              title, 
+              style: const TextStyle(
+                fontWeight: FontWeight.bold, 
+                fontSize: 16, 
+                color: AppTheme.textPrimary,
+              ),
+            ),
           ],
         ),
       ),

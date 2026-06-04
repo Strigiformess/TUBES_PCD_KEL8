@@ -97,7 +97,7 @@ class ImageProcessor {
       interpolation: img.Interpolation.linear,
     );
 
-    final int pixelCount = AppConfig.inputSize * AppConfig.inputSize;
+    const int pixelCount = AppConfig.inputSize * AppConfig.inputSize;
     final Float32List tensor = Float32List(pixelCount * AppConfig.inputChannels);
 
     int idx = 0;
