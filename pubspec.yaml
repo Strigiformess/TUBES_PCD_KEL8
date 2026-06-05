@@ -35,6 +35,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - .env
     - assets/label.txt
     - assets/models/fruit_model.tflite
