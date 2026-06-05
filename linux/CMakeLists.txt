@@ -120,7 +120,13 @@ install(CODE "
   " COMPONENT Runtime)
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
-
+# Install TensorFlow Lite native library if provided by the project.
+set(TFLITE_LIB_BLOB "${PROJECT_BUILD_DIR}/../blobs/libtensorflowlite_c-linux.so")
+if(EXISTS "${TFLITE_LIB_BLOB}")
+  install(FILES "${TFLITE_LIB_BLOB}"
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/../blobs/"
+    COMPONENT Runtime)
+endif()
 # Install the AOT library on non-Debug builds only.
 if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
   install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
