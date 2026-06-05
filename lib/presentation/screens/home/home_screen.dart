@@ -11,6 +11,16 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('FreshCheck'),
         elevation: 0,
+        // ✅ TAMBAHAN: Tombol History di pojok kanan atas
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded, size: 28),
+            tooltip: 'Riwayat Scan',
+            color: AppTheme.primary,
+            onPressed: () => context.pushNamed('history'),
+          ),
+          const SizedBox(width: 8), // Memberikan sedikit jarak dari tepi layar
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -97,7 +107,6 @@ class HomeScreen extends StatelessWidget {
     required String routeName,
   }) {
     return GestureDetector(
-      // ✅ Gunakan go_router bukan Navigator.pushNamed
       onTap: () => context.pushNamed(routeName),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),

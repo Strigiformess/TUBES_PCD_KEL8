@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // ✅ Import Riverpod ditambahkan
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'core/theme/app_theme.dart';
 import 'presentation/screens/home/home_screen.dart';
 import 'presentation/screens/camera/camera_screen.dart';
 import 'presentation/screens/gallery/gallery_screen.dart';
 import 'presentation/screens/detail/detail_screen.dart';
+import 'presentation/screens/history/history_screen.dart'; // ✅ TAMBAHAN: Import History Screen
 import 'data/models/scan_result.dart';
 
-void main() {
-  // ✅ Bungkus MyApp dengan ProviderScope agar state management Riverpod bisa berjalan
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inisialisasi Hive database
+  await Hive.initFlutter();
+  Hive.registerAdapter(ScanResultAdapter());
+  await Hive.openBox<ScanResult>('scan_history');
+  
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -32,7 +41,7 @@ class MyApp extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROUTER CONFIGURATION - Semua routes terdaftar di sini
+// ROUTER CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 
 final GoRouter _router = GoRouter(
@@ -85,6 +94,13 @@ final GoRouter _router = GoRouter(
         final scan = state.extra as ScanResult;
         return DetailScreen(scan: scan);
       },
+    ),
+    
+    // 🗄️ HISTORY SCREEN (✅ TAMBAHAN ROUTE BARU)
+    GoRoute(
+      path: '/history',
+      name: 'history',
+      builder: (context, state) => const HistoryScreen(),
     ),
   ],
 );

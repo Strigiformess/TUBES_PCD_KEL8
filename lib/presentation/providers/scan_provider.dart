@@ -1,29 +1,27 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart'; // ✅ Untuk HapticFeedback
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/scan_result.dart';
+import '../../data/repositories/scan_repository.dart'; // ✅ Untuk simpan Hive
 import '../../domain/services/ml_service.dart';
+import '../../domain/services/pcd_analyzer.dart'; // ✅ Untuk metrik PCD asli
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STATE CLASSES
 // ─────────────────────────────────────────────────────────────────────────────
 
 abstract class ScanState {}
-
 class ScanInitial extends ScanState {}
-
 class ScanLoading extends ScanState {}
-
 class ScanSuccess extends ScanState {
   final ScanResult result;
-
   ScanSuccess(this.result);
 }
-
 class ScanError extends ScanState {
   final String message;
-
   ScanError(this.message);
 }
 
@@ -33,6 +31,7 @@ class ScanError extends ScanState {
 
 class ScanNotifier extends Notifier<ScanState> {
   late MLService _mlService;
+  final ScanRepository _repository = ScanRepository(); // Instansiasi Hive Repo
 
   @override
   ScanState build() {
@@ -51,13 +50,20 @@ class ScanNotifier extends Notifier<ScanState> {
 
       final result = await _performAnalysis(imagePath).timeout(
         const Duration(seconds: 30),
-        onTimeout: () {
-          throw TimeoutException(
-            'Analisis memakan waktu terlalu lama (>30s)',
-            const Duration(seconds: 30),
-          );
-        },
+        onTimeout: () => throw TimeoutException('Analisis memakan waktu terlalu lama (>30s)'),
       );
+
+      // ✅ Berikan Haptic Feedback berdasarkan hasil scan
+      if (result.status == 'Fresh') {
+        HapticFeedback.lightImpact(); // Getaran halus
+      } else if (result.status == 'Medium') {
+        HapticFeedback.mediumImpact(); // Getaran sedang
+      } else {
+        HapticFeedback.heavyImpact(); // Getaran kuat (Busuk)
+      }
+
+      // ✅ Simpan otomatis ke Database Hive (History)
+      await _repository.save(result);
 
       state = ScanSuccess(result);
     } on TimeoutException catch (e) {
@@ -71,27 +77,24 @@ class ScanNotifier extends Notifier<ScanState> {
     try {
       await _mlService.init();
 
-      // WEB → skip File() karena dart:io tidak support
-      if (kIsWeb) {
-        return _generateMockResult(imagePath);
-      }
+      if (kIsWeb) return _generateMockResult(imagePath);
 
-      // NATIVE
       final result = await _mlService.analyzePath(imagePath);
 
       if (result != null) {
+        // ✅ Hitung Metrik PCD Asli (Brightness, Contrast, Saturation, Sharpness)
+        final bytes = await File(imagePath).readAsBytes();
+        final pcdMetrics = PCDAnalyzer.analyze(bytes);
+
         return ScanResult.withAutoStatus(
-          id: DateTime.now().toString(),
+          id: DateTime.now().millisecondsSinceEpoch.toString(), // ID Unik
           imagePath: imagePath,
           foodType: result.label,
           freshnessScore: result.freshnessScore.toDouble(),
           scanDate: DateTime.now(),
-          recommendations: _getRecommendations(
-            result.label,
-            result.freshnessScore,
-          ),
+          recommendations: _getRecommendations(result.label, result.freshnessScore),
           dominantColorHex: _getColorHex(result.label),
-          pcdMetrics: _generatePCDMetrics(),
+          pcdMetrics: pcdMetrics, // ✅ Memasukkan metrik PCD asli
           confidence: result.confidence,
           pipeline: result.pipeline,
         );
@@ -105,79 +108,59 @@ class ScanNotifier extends Notifier<ScanState> {
 
   ScanResult _generateMockResult(String imagePath) {
     const mockFruits = [
-      ('Apel', 85),
-      ('Pisang', 72),
-      ('Tomat', 88),
-      ('Wortel', 79),
-      ('Stroberi', 65),
-      ('Mangga', 81),
+      ('Apel', 85), ('Pisang', 72), ('Tomat', 88), 
+      ('Wortel', 79), ('Stroberi', 65), ('Mangga', 81),
     ];
-
-    final random =
-        mockFruits[DateTime.now().millisecond % mockFruits.length];
-
+    final random = mockFruits[DateTime.now().millisecond % mockFruits.length];
+    
     final foodType = random.$1;
     final score = random.$2;
 
     return ScanResult.withAutoStatus(
-      id: DateTime.now().toString(),
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       imagePath: imagePath,
       foodType: foodType,
       freshnessScore: score.toDouble(),
       scanDate: DateTime.now(),
       recommendations: _getRecommendations(foodType, score),
       dominantColorHex: _getColorHex(foodType),
-      pcdMetrics: _generatePCDMetrics(),
+      pcdMetrics: {
+        'Brightness': 120.0, 'Contrast': 0.5, 
+        'Saturation': 0.4, 'Sharpness': 70.0
+      },
       confidence: 0.87,
       pipeline: 'mlkit_fallback',
     );
   }
 
   List<String> _getRecommendations(String foodType, int score) {
-    if (score >= 80) {
+    if (score >= 70) {
       return [
         '✅ Kondisi sangat baik, siap dikonsumsi sekarang',
         '🧊 Simpan di kulkas untuk daya tahan lebih lama',
         '🌡️ Hindari suhu panas langsung',
       ];
-    } else if (score >= 50) {
+    } else if (score >= 40) {
       return [
-        '⚠️ Disarankan dikonsumsi 1–2 hari',
+        '⚠️ Disarankan dikonsumsi dalam 1–2 hari',
         '🧊 Simpan di tempat sejuk',
-        '👃 Cek aroma sebelum dikonsumsi',
+        '👃 Cek aroma dan tekstur sebelum dikonsumsi',
       ];
     } else {
       return [
-        '🚫 Tidak disarankan dikonsumsi',
-        '♻️ Bisa dikomposkan',
-        '⏰ Perhatikan penyimpanan berikutnya',
+        '🚫 Tidak disarankan untuk dikonsumsi (Sudah tidak layak)',
+        '♻️ Jadikan pupuk kompos',
+        '⏰ Perhatikan masa simpan saat membeli yang baru',
       ];
     }
   }
 
   String _getColorHex(String foodType) {
     const colors = {
-      'Apel': '#E74C3C',
-      'Pisang': '#F1C40F',
-      'Tomat': '#E74C3C',
-      'Wortel': '#E67E22',
-      'Stroberi': '#E91E63',
-      'Mangga': '#F39C12',
-      'Brokoli': '#27AE60',
+      'Apel': '#E74C3C', 'Pisang': '#F1C40F', 'Tomat': '#E74C3C',
+      'Wortel': '#E67E22', 'Stroberi': '#E91E63', 'Mangga': '#F39C12',
     };
-
     return colors[foodType] ?? '#95A5A6';
-  }
-
-  Map<String, double> _generatePCDMetrics() {
-    final now = DateTime.now().millisecond;
-
-    return {
-      'Brightness': 120 + (now % 50).toDouble(),
-      'Contrast': 0.5 + (now % 50) / 100,
-      'Saturation': 0.4 + (now % 50) / 100,
-      'Sharpness': 70 + (now % 30).toDouble(),
-    };
   }
 
   void reset() {
@@ -189,7 +172,6 @@ class ScanNotifier extends Notifier<ScanState> {
 // PROVIDER
 // ─────────────────────────────────────────────────────────────────────────────
 
-final scanStateProvider =
-    NotifierProvider<ScanNotifier, ScanState>(() {
+final scanStateProvider = NotifierProvider<ScanNotifier, ScanState>(() {
   return ScanNotifier();
 });

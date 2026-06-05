@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
+import 'package:tflite_flutter/tflite_flutter.dart'; // ✅ WAJIB IMPORT INI
 
 import '../../core/config/app_config.dart';
 import 'image_processor.dart';
@@ -31,24 +32,19 @@ abstract interface class IMLService {
 /// MLService - Smart ML Pipeline
 class MLService implements IMLService {
   ImageLabeler? _mlKitLabeler;
-
-  dynamic _interpreter;
+  Interpreter? _interpreter; // ✅ Ganti tipe dynamic menjadi Interpreter
 
   final List<String> _labels = [];
-
   bool _isInitialized = false;
-
   String _currentPipeline = 'not_initialized';
 
   @override
   Future<void> init() async {
     try {
       await _initMLKit();
-
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         await _initTFLite();
       }
-
       _isInitialized = true;
     } catch (_) {
       _currentPipeline = 'mock_fallback';
@@ -58,74 +54,49 @@ class MLService implements IMLService {
 
   Future<void> _initMLKit() async {
     try {
-      final options = ImageLabelerOptions(
-        confidenceThreshold: AppConfig.mlKitConfidenceThreshold,
-      );
-
+      final options = ImageLabelerOptions(confidenceThreshold: AppConfig.mlKitConfidenceThreshold);
       _mlKitLabeler = ImageLabeler(options: options);
     } catch (_) {
       _mlKitLabeler = null;
     }
   }
 
+  // ✅ UPDATE: Inisialisasi TFLite
   Future<void> _initTFLite() async {
     if (kIsWeb) return;
-
     try {
       if (!Platform.isAndroid && !Platform.isIOS) return;
-
-      _interpreter = null;
-      _currentPipeline = 'mlkit_only';
-    } catch (_) {
+      
+      // Load model dari assets
+      _interpreter = await Interpreter.fromAsset('assets/models/freshness_model.tflite');
+      _currentPipeline = 'mlkit_tflite'; // Status pipeline menjadi sukses ganda
+    } catch (e) {
+      print("Error loading TFLite: $e");
       _interpreter = null;
       _currentPipeline = 'mlkit_only';
     }
   }
-
-  // ============================================================
-  // TAMBAHAN: analyzePath untuk scan_provider
-  // ============================================================
 
   @override
   Future<AnalysisResult?> analyzePath(String imagePath) async {
-    if (kIsWeb) {
-      return _generateMockResult('Web Image');
-    }
-
+    if (kIsWeb) return _generateMockResult('Web Image');
     final file = File(imagePath);
-
-    if (!await file.exists()) {
-      return null;
-    }
-
+    if (!await file.exists()) return null;
     return analyzeFile(file);
   }
 
-  // ============================================================
-
   @override
   Future<AnalysisResult?> analyzeFile(File imageFile) async {
-    if (!_isInitialized) {
-      await init();
-    }
-
+    if (!_isInitialized) await init();
     try {
-      if (!await imageFile.exists()) {
-        return null;
-      }
+      if (!await imageFile.exists()) return null;
 
-      final String? mlKitLabel =
-          await _runMLKit(imageFile);
+      // 1. Dapatkan Label Buah dari ML Kit
+      final String? mlKitLabel = await _runMLKit(imageFile);
+      if (mlKitLabel == null) return _generateMockResult('Unknown Food');
 
-      if (mlKitLabel == null) {
-        return _generateMockResult('Unknown Food');
-      }
-
-      final freshnessData =
-          await _runFreshnessAnalysis(
-        imageFile,
-        mlKitLabel,
-      );
+      // 2. Dapatkan Skor Kesegaran dari TFLite
+      final freshnessData = await _runFreshnessAnalysis(imageFile, mlKitLabel);
 
       return AnalysisResult(
         label: freshnessData.$1,
@@ -141,236 +112,87 @@ class MLService implements IMLService {
   Future<String?> _runMLKit(File imageFile) async {
     try {
       if (_mlKitLabeler == null) return null;
-
-      final inputImage =
-          InputImage.fromFile(imageFile);
-
-      final labels =
-          await _mlKitLabeler!.processImage(
-        inputImage,
-      );
+      final inputImage = InputImage.fromFile(imageFile);
+      final labels = await _mlKitLabeler!.processImage(inputImage);
 
       for (final label in labels) {
-        final match =
-            AppConfig.supportedFruits.firstWhere(
-          (fruit) => label.label
-              .toLowerCase()
-              .contains(
-                fruit.toLowerCase(),
-              ),
+        final match = AppConfig.supportedFruits.firstWhere(
+          (fruit) => label.label.toLowerCase().contains(fruit.toLowerCase()),
           orElse: () => '',
         );
-
-        if (match.isNotEmpty) {
-          return match;
-        }
+        if (match.isNotEmpty) return match;
       }
-
-      if (labels.isNotEmpty) {
-        return labels.first.label;
-      }
-
+      if (labels.isNotEmpty) return labels.first.label;
       return null;
     } catch (_) {
       return null;
     }
   }
 
-  Future<(String, double, int)>
-      _runFreshnessAnalysis(
-    File imageFile,
-    String detectedLabel,
-  ) async {
-    if (_interpreter != null &&
-        !kIsWeb) {
-      return _runTFLiteModel(
-        imageFile,
-        detectedLabel,
-      );
+  Future<(String, double, int)> _runFreshnessAnalysis(File imageFile, String detectedLabel) async {
+    if (_interpreter != null && !kIsWeb) {
+      return _runTFLiteModel(imageFile, detectedLabel);
     }
-
-    return _simulateFreshnessScore(
-      detectedLabel,
-    );
+    return _simulateFreshnessScore(detectedLabel);
   }
 
-  Future<(String, double, int)>
-      _runTFLiteModel(
-    File imageFile,
-    String detectedLabel,
-  ) async {
+  // ✅ UPDATE: Menjalankan Inferensi TFLite Asli
+  Future<(String, double, int)> _runTFLiteModel(File imageFile, String detectedLabel) async {
     try {
-      if (_interpreter == null) {
-        return _simulateFreshnessScore(
-          detectedLabel,
-        );
+      if (_interpreter == null) return _simulateFreshnessScore(detectedLabel);
+
+      final bytes = await imageFile.readAsBytes();
+      
+      // Asumsi preprocessImageBytes mereturn Float32List ukuran [1, 224, 224, 3]
+      final inputTensor = await ImageProcessor.preprocessImageBytes(bytes);
+
+      // Siapkan buffer output (Asumsi model Kaggle memprediksi 2 kelas: Fresh dan Rotten)
+      var outputBuffer = List.generate(1, (_) => List<double>.filled(2, 0.0));
+
+      // Jalankan model!
+      _interpreter!.run(inputTensor, outputBuffer);
+
+      // Ekstrak probabilitas. Asumsi: Index 0 = Fresh, Index 1 = Rotten
+      double probFresh = outputBuffer[0][0];
+      double probRotten = outputBuffer[0][1];
+
+      // Normalisasi nilai jika outputnya bukan persentase
+      double total = probFresh + probRotten;
+      if (total > 0) {
+        probFresh /= total;
+        probRotten /= total;
       }
 
-      final bytes =
-          await imageFile.readAsBytes();
+      // Hitung Confidence & Score 0-100
+      double confidence = probFresh > probRotten ? probFresh : probRotten;
+      int freshnessScore = (probFresh * 100).round().clamp(0, 100);
 
-      final inputTensor =
-          await ImageProcessor
-              .preprocessImageBytes(
-        bytes,
-      );
-
-      final outputShape =
-          _interpreter
-              .getOutputTensor(0)
-              .shape;
-
-      final outputBuffer =
-          List.generate(
-        1,
-        (_) => List<double>.filled(
-          outputShape[1],
-          0.0,
-        ),
-      );
-
-      _interpreter.run(
-        [inputTensor],
-        outputBuffer,
-      );
-
-      final List<double> scores =
-          outputBuffer[0];
-
-      int bestIdx = 0;
-
-      for (
-        int i = 1;
-        i < scores.length;
-        i++
-      ) {
-        if (scores[i] >
-            scores[bestIdx]) {
-          bestIdx = i;
-        }
-      }
-
-      final String label =
-          bestIdx < _labels.length
-              ? _labels[bestIdx]
-              : detectedLabel;
-
-      final double confidence =
-          scores[bestIdx].clamp(
-        0.0,
-        1.0,
-      );
-
-      final int freshnessScore =
-          _confidenceToFreshnessScore(
-        scores,
-        label,
-      );
-
-      return (
-        label,
-        confidence,
-        freshnessScore,
-      );
-    } catch (_) {
-      return _simulateFreshnessScore(
-        detectedLabel,
-      );
+      return (detectedLabel, confidence, freshnessScore);
+      
+    } catch (e) {
+      print("TFLite inference failed: $e");
+      return _simulateFreshnessScore(detectedLabel);
     }
   }
 
-  int _confidenceToFreshnessScore(
-    List<double> scores,
-    String label,
-  ) {
-    try {
-      if (scores.length >= 3) {
-        final pFresh =
-            scores[0].clamp(
-          0.0,
-          1.0,
-        );
-
-        final pMedium =
-            scores[1].clamp(
-          0.0,
-          1.0,
-        );
-
-        final pPoor =
-            scores[2].clamp(
-          0.0,
-          1.0,
-        );
-
-        final score =
-            ((pFresh * 100) +
-                    (pMedium *
-                        60) +
-                    (pPoor *
-                        20)) /
-                1.8;
-
-        return score
-            .round()
-            .clamp(0, 100);
-      }
-
-      return (scores.first
-                  .clamp(
-                    0.0,
-                    1.0,
-                  ) *
-              100)
-          .round();
-    } catch (_) {
-      return 50;
-    }
-  }
-
-  (String, double, int)
-      _simulateFreshnessScore(
-    String label,
-  ) {
+  (String, double, int) _simulateFreshnessScore(String label) {
     const mockData = {
-      'Apple': (0.92, 88),
-      'Apel': (0.92, 88),
-      'Banana': (0.78, 62),
-      'Pisang': (0.78, 62),
-      'Tomato': (0.88, 81),
-      'Tomat': (0.88, 81),
+      'Apple': (0.92, 88), 'Apel': (0.92, 88),
+      'Banana': (0.78, 62), 'Pisang': (0.78, 62),
+      'Tomato': (0.88, 81), 'Tomat': (0.88, 81),
       'Mangga': (0.89, 81),
     };
-
-    final data =
-        mockData[label] ??
-            (0.75, 70);
-
-    return (
-      label,
-      data.$1,
-      data.$2,
-    );
+    final data = mockData[label] ?? (0.75, 70);
+    return (label, data.$1, data.$2);
   }
 
-  AnalysisResult _generateMockResult(
-    String label,
-  ) {
-    final (
-      finalLabel,
-      confidence,
-      score,
-    ) =
-        _simulateFreshnessScore(
-      label,
-    );
-
+  AnalysisResult _generateMockResult(String label) {
+    final (finalLabel, confidence, score) = _simulateFreshnessScore(label);
     return AnalysisResult(
       label: finalLabel,
       confidence: confidence,
       freshnessScore: score,
-      pipeline:
-          'mock_fallback',
+      pipeline: 'mock_fallback',
     );
   }
 
@@ -378,7 +200,7 @@ class MLService implements IMLService {
   void dispose() {
     try {
       _mlKitLabeler?.close();
-
+      _interpreter?.close(); // ✅ Tutup interpreter untuk cegah memory leak
       _isInitialized = false;
     } catch (_) {}
   }

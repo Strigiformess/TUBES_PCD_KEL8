@@ -1,16 +1,25 @@
+// lib/data/repositories/scan_repository.dart
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/scan_result.dart';
 
 class ScanRepository {
-  // Menyimpan riwayat scan sementara dalam list
-  final List<ScanResult> _history = [];
+  static const _boxName = 'scan_history';
+  
+  Box<ScanResult> get _box => Hive.box<ScanResult>(_boxName);
 
-  Future<List<ScanResult>> getHistory() async {
-    // Simulasi memuat data
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _history;
+  // Simpan hasil scan baru
+  Future<void> save(ScanResult result) async {
+    await _box.put(result.id, result);
   }
 
-  Future<void> saveScan(ScanResult result) async {
-    _history.insert(0, result); // Data terbaru selalu di atas
+  // Ambil semua riwayat (terbaru dulu)
+  List<ScanResult> getAll() {
+    return _box.values.toList()
+      ..sort((a, b) => b.scanDate.compareTo(a.scanDate));
+  }
+
+  // Hapus satu hasil
+  Future<void> delete(String id) async {
+    await _box.delete(id);
   }
 }
