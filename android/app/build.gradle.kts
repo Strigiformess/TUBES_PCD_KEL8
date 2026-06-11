@@ -18,6 +18,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // PERBAIKAN: Ganti kotlin { jvmToolchain(17) } dengan kotlinOptions
+    // agar Java dan Kotlin target sama persis (tidak konflik dengan tflite_flutter)
+    kotlin {
+        jvmToolchain(17)
+    }
+
     defaultConfig {
         applicationId = "com.example.freshcheck"
         minSdk = maxOf(26, flutter.minSdkVersion)

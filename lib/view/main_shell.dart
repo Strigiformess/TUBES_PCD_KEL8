@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../app_theme.dart';
+import '../widgets/sync_status_widget.dart';
 import 'package:provider/provider.dart';
 import '../app_theme.dart';
 import '../controller/app_controller.dart';
@@ -6,6 +8,7 @@ import '../service/auth_service.dart';    // ← baru
 import 'home_tab.dart';
 import 'scanner_tab.dart';
 import 'history_tab.dart';
+import 'settings_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -57,17 +60,33 @@ class _MainShellState extends State<MainShell> {
       appBar: AppBar(
         title: Row(children: [
           Container(
-            width: 32, height: 32,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: AppTheme.greenLight,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.eco_rounded, color: AppTheme.green, size: 18),
+            child:
+                const Icon(Icons.eco_rounded, color: AppTheme.green, size: 18),
           ),
           const SizedBox(width: 10),
           Text(_titles[_tab]),
         ]),
         actions: [
+          // Sync Status Badge
+          const Padding(
+            padding: EdgeInsets.only(right: 8),
+            child: SyncStatusWidget(),
+          ),
+          // Settings Button
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
           // Avatar + nama user
           if (auth.currentUser != null)
             Padding(
@@ -86,14 +105,12 @@ class _MainShellState extends State<MainShell> {
           ),
         ],
       ),
-
       body: SafeArea(
         top: false,
         child: tabs[_tab],
       ),
-
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(top: BorderSide(color: AppTheme.border)),
         ),
