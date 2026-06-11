@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -17,17 +18,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // PERBAIKAN: Ganti kotlin { jvmToolchain(17) } dengan kotlinOptions
-    // agar Java dan Kotlin target sama persis (tidak konflik dengan tflite_flutter)
-    kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(<JavaVersion.VERSION_17>))
-        }
-    }
-
     defaultConfig {
         applicationId = "com.example.freshcheck"
-        minSdk = maxOf(26, flutter.minSdkVersion ?: 26)
+        minSdk = maxOf(26, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -37,6 +30,12 @@ android {
         release {
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
