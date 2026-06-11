@@ -5,8 +5,11 @@ import 'package:provider/provider.dart';
 import 'app_theme.dart';
 import 'controller/app_controller.dart';
 import 'model/history_model.dart';
+import 'model/user_model.dart';          // ← baru
+import 'service/auth_service.dart';      // ← baru
 import 'service/tflite_service.dart';
 import 'view/main_shell.dart';
+import 'view/login_screen.dart';         // ← baru
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,13 +17,21 @@ Future<void> main() async {
   // Init Hive
   await Hive.initFlutter();
   Hive.registerAdapter(HistoryItemAdapter());
+  Hive.registerAdapter(UserModelAdapter());   // ← daftarkan adapter user
 
   // Load TFLite model
   await TfliteService().loadModel();
 
+  // Init AuthService (buka box session)
+  final authService = AuthService();
+  await authService.init();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppController()..init(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: authService),
+        ChangeNotifierProvider(create: (_) => AppController()..init()),
+      ],
       child: const FreshCheckApp(),
     ),
   );
@@ -35,7 +46,11 @@ class FreshCheckApp extends StatelessWidget {
       title: 'FreshCheck',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const MainShell(),
+      // Routing berdasarkan status login
+      home: Consumer<AuthService>(
+        builder: (_, auth, __) =>
+          auth.isLoggedIn ? const MainShell() : const LoginScreen(),
+      ),
     );
   }
 }
