@@ -8,7 +8,11 @@ import 'controller/app_controller.dart';
 import 'model/history_model.dart';
 import 'model/sync_queue_model.dart';
 import 'service/hive_service.dart';
+import 'model/user_model.dart';          // ← baru
+import 'service/auth_service.dart';      // ← baru
+import 'service/tflite_service.dart';
 import 'view/main_shell.dart';
+import 'view/login_screen.dart';         // ← baru
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,14 +37,22 @@ Future<void> main() async {
 
   // Initialize HiveService (akan membuka semua boxes)
   await HiveService.init();
+  Hive.registerAdapter(UserModelAdapter());   // ← daftarkan adapter user
 
   // ══════════════════════════════════════════════════════════════
   // RUN APP
   // ══════════════════════════════════════════════════════════════
 
+  // Init AuthService (buka box session)
+  final authService = AuthService();
+  await authService.init();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppController()..init(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: authService),
+        ChangeNotifierProvider(create: (_) => AppController()..init()),
+      ],
       child: const FreshCheckApp(),
     ),
   );
@@ -55,7 +67,11 @@ class FreshCheckApp extends StatelessWidget {
       title: 'FreshCheck',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const MainShell(),
+      // Routing berdasarkan status login
+      home: Consumer<AuthService>(
+        builder: (_, auth, __) =>
+          auth.isLoggedIn ? const MainShell() : const LoginScreen(),
+      ),
     );
   }
 }

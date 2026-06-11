@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../app_theme.dart';
 import '../widgets/sync_status_widget.dart';
+import 'package:provider/provider.dart';
+import '../app_theme.dart';
+import '../controller/app_controller.dart';
+import '../service/auth_service.dart';    // ← baru
 import 'home_tab.dart';
 import 'scanner_tab.dart';
 import 'history_tab.dart';
@@ -17,8 +21,34 @@ class _MainShellState extends State<MainShell> {
 
   static const _titles = ['FreshCheck', 'Scanner', 'Scan History'];
 
+  Future<void> _confirmLogout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Keluar?', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: const Text('Kamu akan keluar dari akun ini.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal', style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Keluar', style: TextStyle(color: AppTheme.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true && mounted) {
+      await context.read<AuthService>().logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+
     final tabs = [
       const HomeTab(),
       const ScannerTab(),
@@ -57,6 +87,21 @@ class _MainShellState extends State<MainShell> {
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
+          // Avatar + nama user
+          if (auth.currentUser != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Center(child: Text(
+                auth.currentUser!.name.split(' ').first,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary, fontSize: 13),
+              )),
+            ),
+          // Tombol logout
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, size: 20),
+            tooltip: 'Keluar',
+            onPressed: _confirmLogout,
           ),
         ],
       ),
