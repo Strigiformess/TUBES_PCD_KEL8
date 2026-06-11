@@ -1,59 +1,56 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'history_model.dart';
+part of 'sync_queue_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class HistoryItemAdapter extends TypeAdapter<HistoryItem> {
+class SyncQueueItemAdapter extends TypeAdapter<SyncQueueItem> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
-  HistoryItem read(BinaryReader reader) {
+  SyncQueueItem read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return HistoryItem(
+    return SyncQueueItem(
       id: fields[0] as String,
-      foodName: fields[1] as String,
-      imagePath: fields[2] as String,
-      skor: fields[3] as double,
-      kategori: fields[4] as String,
+      historyId: fields[1] as String,
+      operation: fields[2] as String,
+      data: (fields[3] as Map).cast<String, dynamic>(),
+      isSynced: fields[4] as bool,
       createdAt: fields[5] as DateTime,
-      skorWarna: fields[6] as double,
-      skorKecerahan: fields[7] as double,
-      skorTekstur: fields[8] as double,
-      skorKerusakan: fields[9] as double,
+      syncedAt: fields[6] as DateTime?,
+      retryCount: fields[7] as int,
+      errorMessage: fields[8] as String?,
     );
   }
 
   @override
-  void write(BinaryWriter writer, HistoryItem obj) {
+  void write(BinaryWriter writer, SyncQueueItem obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.foodName)
+      ..write(obj.historyId)
       ..writeByte(2)
-      ..write(obj.imagePath)
+      ..write(obj.operation)
       ..writeByte(3)
-      ..write(obj.skor)
+      ..write(obj.data)
       ..writeByte(4)
-      ..write(obj.kategori)
+      ..write(obj.isSynced)
       ..writeByte(5)
       ..write(obj.createdAt)
       ..writeByte(6)
-      ..write(obj.skorWarna)
+      ..write(obj.syncedAt)
       ..writeByte(7)
-      ..write(obj.skorKecerahan)
+      ..write(obj.retryCount)
       ..writeByte(8)
-      ..write(obj.skorTekstur)
-      ..writeByte(9)
-      ..write(obj.skorKerusakan);
+      ..write(obj.errorMessage);
   }
 
   @override
@@ -62,7 +59,7 @@ class HistoryItemAdapter extends TypeAdapter<HistoryItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is HistoryItemAdapter &&
+      other is SyncQueueItemAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

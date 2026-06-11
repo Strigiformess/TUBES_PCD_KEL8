@@ -1,14 +1,17 @@
 // controller/app_controller.dart
 // Hybrid: TFLite untuk klasifikasi + PCD via backend untuk detail fitur.
 // Jika backend tidak tersedia, hanya TFLite yang dipakai.
+// Dengan implementasi offline-first menggunakan Hive
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import 'package:path/path.dart' as p;
 import '../model/history_model.dart';
+import '../model/sync_queue_model.dart';
 import '../service/tflite_service.dart';
-import '../service/api_service.dart';        // tetap ada untuk detail PCD
+import '../service/api_service.dart';
+import '../service/hive_service.dart';
+import '../service/sync_service.dart';
 
 enum ScanState { idle, loading, success, error }
 
@@ -43,6 +46,7 @@ class ScanResult {
 
 class AppController extends ChangeNotifier {
   final TfliteService _tflite = TfliteService();
+  final SyncService _syncService = SyncService();
 
   ScanState scanState = ScanState.idle;
   File? selectedImage;
@@ -50,15 +54,41 @@ class AppController extends ChangeNotifier {
   String errorMsg = '';
 
   List<HistoryItem> history = [];
-  late Box<HistoryItem> _box;
+
+  // Sync status
+  bool get isSyncing => _syncService.isSyncing;
+  bool get isOnline => _syncService.isOnline;
+  int get pendingSyncCount => _syncService.pendingSyncCount;
+  DateTime? get lastSyncTime => _syncService.lastSyncTime;
 
   Future<void> init() async {
     // Load TFLite model
     await _tflite.loadModel();
 
-    // Load Hive history
-    _box = await Hive.openBox<HistoryItem>('history');
+    // Initialize Hive service
+    await HiveService.init();
+
+    // Initialize Sync service
+    await _syncService.init();
+
+    // Listen to sync status changes
+    _syncService.syncStatusStream.listen((status) {
+      debugPrint('Sync status: ${status.state} - ${status.message}');
+      notifyListeners();
+    });
+
+    // Load history
     _loadHistory();
+
+    // Load last sync time
+    final lastSyncStr = HiveService.getSetting<String>('last_sync_time');
+    if (lastSyncStr != null) {
+      try {
+        // Last sync time is already stored in _syncService
+      } catch (e) {
+        debugPrint('Error parsing last sync time: $e');
+      }
+    }
   }
 
   void setImage(File f) {
@@ -85,9 +115,9 @@ class AppController extends ChangeNotifier {
 
       try {
         final pcdResult = await ApiService.analyze(selectedImage!);
-        skorWarna     = pcdResult.skorWarna;
+        skorWarna = pcdResult.skorWarna;
         skorKecerahan = pcdResult.skorKecerahan;
-        skorTekstur   = pcdResult.skorTekstur;
+        skorTekstur = pcdResult.skorTekstur;
         skorKerusakan = pcdResult.skorKerusakan;
         usedPcd = true;
       } catch (_) {
@@ -110,7 +140,6 @@ class AppController extends ChangeNotifier {
 
       scanState = ScanState.success;
       await _saveHistory(result!);
-
     } catch (e) {
       errorMsg = e.toString().replaceFirst('Exception: ', '');
       scanState = ScanState.error;
@@ -133,19 +162,62 @@ class AppController extends ChangeNotifier {
       skorTekstur: r.skorTekstur ?? 0,
       skorKerusakan: r.skorKerusakan ?? 0,
     );
-    await _box.put(item.id, item);
+
+    // Save to Hive
+    await HiveService.saveHistory(item);
+
+    // Add to sync queue untuk di-sync ke backend nanti
+    final syncItem = SyncQueueItem.fromHistoryItem(
+      historyId: item.id,
+      operation: SyncOperation.create,
+      data: {
+        'id': item.id,
+        'foodName': item.foodName,
+        'imagePath': item.imagePath,
+        'skor': item.skor,
+        'kategori': item.kategori,
+        'createdAt': item.createdAt.toIso8601String(),
+        'skorWarna': item.skorWarna,
+        'skorKecerahan': item.skorKecerahan,
+        'skorTekstur': item.skorTekstur,
+        'skorKerusakan': item.skorKerusakan,
+      },
+    );
+    await HiveService.addToSyncQueue(syncItem);
+
+    // Reload history
     _loadHistory();
+
+    // Try to sync if online
+    if (_syncService.isOnline && !_syncService.isSyncing) {
+      _syncService.syncAll();
+    }
   }
 
   void _loadHistory() {
-    history = _box.values.toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    history = HiveService.getAllHistory();
     notifyListeners();
   }
 
   Future<void> deleteHistory(String id) async {
-    await _box.delete(id);
+    // Delete dari Hive
+    await HiveService.deleteHistory(id);
+
+    // Add to sync queue untuk delete di backend
+    final syncItem = SyncQueueItem.fromHistoryItem(
+      historyId: id,
+      operation: SyncOperation.delete,
+      data: {'id': id},
+    );
+    await HiveService.addToSyncQueue(syncItem);
+
+    // Reload history
     _loadHistory();
+
+    // Try to sync if online
+    if (_syncService.isOnline && !_syncService.isSyncing) {
+      _syncService.syncAll();
+    }
   }
 
   void resetScan() {
@@ -156,12 +228,37 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  double get avgFreshness {
-    if (history.isEmpty) return 0;
-    return history.map((e) => e.skor).reduce((a, b) => a + b) / history.length;
+  double get avgFreshness => HiveService.getAverageFreshness();
+  int get totalScans => HiveService.getTotalScans();
+
+  /// Manual sync
+  Future<SyncResult> syncNow() async {
+    return await _syncService.syncAll();
   }
 
-  int get totalScans => history.length;
+  /// Retry failed syncs
+  Future<SyncResult> retryFailedSyncs() async {
+    return await _syncService.retryFailedSyncs();
+  }
+
+  /// Search history
+  List<HistoryItem> searchHistory(String query) {
+    return HiveService.searchHistory(query);
+  }
+
+  /// Get history by kategori
+  List<HistoryItem> getHistoryByKategori(String kategori) {
+    return HiveService.getHistoryByKategori(kategori);
+  }
+
+  /// Get statistics
+  Map<String, int> getStatsByKategori() {
+    return HiveService.getStatsByKategori();
+  }
+
+  Map<String, int> getStatsByDate({int days = 7}) {
+    return HiveService.getStatsByDate(days: days);
+  }
 
   String _capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1).toLowerCase();
@@ -169,6 +266,7 @@ class AppController extends ChangeNotifier {
   @override
   void dispose() {
     _tflite.dispose();
+    _syncService.dispose();
     super.dispose();
   }
 }
