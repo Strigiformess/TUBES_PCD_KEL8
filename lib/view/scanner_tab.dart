@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../app_theme.dart';
 import '../controller/app_controller.dart';
+import '../service/image_filter_service.dart';
 import 'result_screen.dart';
 
 class ScannerTab extends StatelessWidget {
@@ -56,7 +57,9 @@ class ScannerTab extends StatelessWidget {
             child: ctrl.selectedImage != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(19),
-                    child: Image.file(ctrl.selectedImage!, fit: BoxFit.cover),
+                    child: ctrl.filteredImage != null
+                        ? Image.memory(ctrl.filteredImage!, fit: BoxFit.cover)
+                        : Image.file(ctrl.selectedImage!, fit: BoxFit.cover),
                   )
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -72,6 +75,26 @@ class ScannerTab extends StatelessWidget {
                         ),
                       ]),
           ),
+
+          // Filter processing overlay
+          if (ctrl.isFiltering)
+            Positioned.fill(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Center(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 10),
+                    Text('Applying filter...',
+                        style: TextStyle(color: Colors.white, fontSize: 13)),
+                  ]),
+                ),
+              ),
+            ),
 
           // PCD Active badge
           if (ctrl.selectedImage != null)
@@ -105,6 +128,13 @@ class ScannerTab extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         child: Column(children: [
+
+          // PCD Filter buttons (shown only when an image is selected)
+          if (ctrl.selectedImage != null) ...[
+            const _FilterBar(),
+            const SizedBox(height: 12),
+          ],
+
           // Camera / Gallery
           Row(children: [
             _PickBtn(
@@ -126,7 +156,8 @@ class ScannerTab extends StatelessWidget {
             height: 54,
             child: ElevatedButton.icon(
               onPressed: ctrl.selectedImage == null ||
-                      ctrl.scanState == ScanState.loading
+                      ctrl.scanState == ScanState.loading ||
+                      ctrl.isFiltering
                   ? null
                   : () => _analyze(context),
               icon: ctrl.scanState == ScanState.loading
@@ -208,4 +239,60 @@ class _PickBtn extends StatelessWidget {
           ),
         ),
       );
+}
+
+// ─── PCD Filter selector bar ──────────────────────────────────────────────
+class _FilterBar extends StatelessWidget {
+  const _FilterBar();
+
+  static const _filters = <(PCDFilter, String, IconData)>[
+    (PCDFilter.none,         'Original',    Icons.image_outlined),
+    (PCDFilter.grayscale,    'Grayscale',   Icons.filter_b_and_w_outlined),
+    (PCDFilter.gaussianBlur, 'Blur',        Icons.blur_on_outlined),
+    (PCDFilter.sobelEdge,    'Edge',        Icons.grid_on_outlined),
+    (PCDFilter.otsuThreshold,'Threshold',   Icons.contrast_outlined),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final ctrl = context.watch<AppController>();
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _filters.map((f) {
+          final active = ctrl.activeFilter == f.$1;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => ctrl.applyFilter(f.$1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: active ? AppTheme.green : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: active ? AppTheme.green : AppTheme.border,
+                  ),
+                ),
+                child: Row(children: [
+                  Icon(f.$3,
+                      size: 14,
+                      color: active ? Colors.white : AppTheme.textSecondary),
+                  const SizedBox(width: 5),
+                  Text(f.$2,
+                      style: TextStyle(
+                        color: active ? Colors.white : AppTheme.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ]),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 }

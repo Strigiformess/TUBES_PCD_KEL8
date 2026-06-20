@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../app_theme.dart';
 import '../widgets/sync_status_widget.dart';
 import 'package:provider/provider.dart';
-import '../app_theme.dart';
+
 import '../controller/app_controller.dart';
 import '../service/auth_service.dart';    // ← baru
 import 'home_tab.dart';
@@ -87,6 +87,7 @@ class _MainShellState extends State<MainShell> {
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
+          ),
           // Avatar + nama user
           if (auth.currentUser != null)
             Padding(
