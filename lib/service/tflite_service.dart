@@ -40,11 +40,20 @@ class TfliteService {
   /// Muat model dari assets. Panggil sekali saat init.
   Future<void> loadModel() async {
     try {
+      print('⚙️ Loading TFLite model from: $_modelPath');
       _interpreter = await Interpreter.fromAsset(_modelPath);
+
+      // Log model info for debugging
+      final inputShape  = _interpreter!.getInputTensor(0).shape;
+      final outputShape = _interpreter!.getOutputTensor(0).shape;
+      print('✅ Model loaded! input=$inputShape  output=$outputShape');
+
       _isLoaded = true;
-    } catch (e) {
+    } catch (e, st) {
       _isLoaded = false;
-      throw Exception('Gagal memuat model TFLite: $e');
+      print('❌ Gagal memuat model TFLite: $e');
+      print(st);
+      // Don't rethrow — let the app start even without the model
     }
   }
 

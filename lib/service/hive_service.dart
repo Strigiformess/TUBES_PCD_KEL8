@@ -16,11 +16,22 @@ class HiveService {
   static Box<SyncQueueItem>? _syncQueueBox;
   static Box? _settingsBox;
 
+  /// Safely open a Hive box; if data is corrupted, delete and re-create it.
+  static Future<Box<T>> _safeOpenBox<T>(String name) async {
+    try {
+      return await Hive.openBox<T>(name);
+    } catch (e) {
+      print('⚠️ Hive box "$name" corrupted ($e). Deleting and re-creating...');
+      await Hive.deleteBoxFromDisk(name);
+      return await Hive.openBox<T>(name);
+    }
+  }
+
   /// Initialize semua boxes
   static Future<void> init() async {
-    _historyBox = await Hive.openBox<HistoryItem>(historyBox);
-    _syncQueueBox = await Hive.openBox<SyncQueueItem>(syncQueueBox);
-    _settingsBox = await Hive.openBox(settingsBox);
+    _historyBox   = await _safeOpenBox<HistoryItem>(historyBox);
+    _syncQueueBox = await _safeOpenBox<SyncQueueItem>(syncQueueBox);
+    _settingsBox  = await _safeOpenBox(settingsBox);
   }
 
   /// Getters untuk boxes

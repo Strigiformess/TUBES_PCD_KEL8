@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../app_theme.dart';
 import '../controller/app_controller.dart';
 import '../model/history_model.dart';
+import '../service/auth_service.dart';
 import '../widgets/common_widgets.dart';
 
 // ─────────────────────────────────────────────
@@ -30,7 +31,9 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ctrl = context.watch<AppController>();
+    final auth = context.watch<AuthService>();
     final tip = _tips[DateTime.now().dayOfYear % _tips.length];
+    final userName = auth.currentUser?.name.split(' ').first ?? 'Chef';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -38,7 +41,7 @@ class HomeTab extends StatelessWidget {
 
         // ── Greeting ──
         const SizedBox(height: 8),
-        const Text('Hello, Chef.', style: TextStyle(
+        Text('Halo, $userName.', style: const TextStyle(
           fontSize: 26, fontWeight: FontWeight.w800, color: AppTheme.textPrimary,
         )),
         const Text('Ready for a freshness scan?', style: TextStyle(

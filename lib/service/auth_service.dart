@@ -20,10 +20,21 @@ class AuthService extends ChangeNotifier {
   UserModel? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
 
+  /// Helper: safely open a Hive box; delete + retry on corruption.
+  static Future<Box<T>> _safeOpen<T>(String name) async {
+    try {
+      return await Hive.openBox<T>(name);
+    } catch (e) {
+      print('⚠️ Hive box "$name" corrupted ($e). Deleting and re-creating...');
+      await Hive.deleteBoxFromDisk(name);
+      return await Hive.openBox<T>(name);
+    }
+  }
+
   /// Inisialisasi: buka box & restore sesi.
   Future<void> init() async {
-    _users   = await Hive.openBox<UserModel>(_usersBox);
-    _session = await Hive.openBox<String>(_sessionBox);
+    _users   = await _safeOpen<UserModel>(_usersBox);
+    _session = await _safeOpen<String>(_sessionBox);
     _restoreSession();
   }
 

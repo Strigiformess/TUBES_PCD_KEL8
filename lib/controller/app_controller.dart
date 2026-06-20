@@ -12,6 +12,7 @@ import '../service/tflite_service.dart';
 import '../service/api_service.dart';
 import '../service/hive_service.dart';
 import '../service/sync_service.dart';
+import '../service/image_filter_service.dart';
 
 enum ScanState { idle, loading, success, error }
 
@@ -52,6 +53,11 @@ class AppController extends ChangeNotifier {
   File? selectedImage;
   ScanResult? result;
   String errorMsg = '';
+
+  // PCD Filter state
+  PCDFilter activeFilter = PCDFilter.none;
+  Uint8List? filteredImage;
+  bool isFiltering = false;
 
   List<HistoryItem> history = [];
 
@@ -96,6 +102,38 @@ class AppController extends ChangeNotifier {
     result = null;
     scanState = ScanState.idle;
     errorMsg = '';
+    activeFilter = PCDFilter.none;
+    filteredImage = null;
+    isFiltering = false;
+    notifyListeners();
+  }
+
+  /// Apply a PCD filter to the selected image (runs in isolate).
+  /// Pass [PCDFilter.none] to clear the filter and show the original.
+  Future<void> applyFilter(PCDFilter filter) async {
+    activeFilter = filter;
+    if (filter == PCDFilter.none || selectedImage == null) {
+      filteredImage = null;
+      isFiltering = false;
+      notifyListeners();
+      return;
+    }
+    isFiltering = true;
+    notifyListeners();
+    try {
+      final bytes = await selectedImage!.readAsBytes();
+      filteredImage = await compute(
+        (List<Object> args) => ImageFilterService.applyFilter(
+          args[0] as Uint8List,
+          args[1] as PCDFilter,
+        ),
+        [bytes, filter],
+      );
+    } catch (e) {
+      debugPrint('Filter error: $e');
+      filteredImage = null;
+    }
+    isFiltering = false;
     notifyListeners();
   }
 
