@@ -1,106 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 
-import 'core/theme/app_theme.dart';
-import 'presentation/screens/home/home_screen.dart';
-import 'presentation/screens/camera/camera_screen.dart';
-import 'presentation/screens/gallery/gallery_screen.dart';
-import 'presentation/screens/detail/detail_screen.dart';
-import 'presentation/screens/history/history_screen.dart'; // ✅ TAMBAHAN: Import History Screen
-import 'data/models/scan_result.dart';
+import 'app_theme.dart';
+import 'config/app_config.dart';
+import 'controller/app_controller.dart';
+import 'model/history_model.dart';
+import 'model/sync_queue_model.dart';
+import 'service/hive_service.dart';
+import 'model/user_model.dart';          // ← baru
+import 'service/auth_service.dart';      // ← baru
+import 'service/tflite_service.dart';
+import 'view/main_shell.dart';
+import 'view/login_screen.dart';         // ← baru
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inisialisasi Hive database
+
+  // ══════════════════════════════════════════════════════════════
+  // LOAD ENVIRONMENT VARIABLES
+  // ══════════════════════════════════════════════════════════════
+
+  await AppConfig.load();
+  AppConfig.printConfig(); // Print config jika debug mode
+
+  // ══════════════════════════════════════════════════════════════
+  // INITIALIZE HIVE - OFFLINE FIRST DATABASE
+  // ══════════════════════════════════════════════════════════════
+
+  // Init Hive Flutter
   await Hive.initFlutter();
-  Hive.registerAdapter(ScanResultAdapter());
-  await Hive.openBox<ScanResult>('scan_history');
-  
+
+  // Register Adapters
+  Hive.registerAdapter(HistoryItemAdapter());
+  Hive.registerAdapter(SyncQueueItemAdapter());
+
+  // Initialize HiveService (akan membuka semua boxes)
+  await HiveService.init();
+  Hive.registerAdapter(UserModelAdapter());   // ← daftarkan adapter user
+
+  // ══════════════════════════════════════════════════════════════
+  // RUN APP
+  // ══════════════════════════════════════════════════════════════
+
+  // Init AuthService (buka box session)
+  final authService = AuthService();
+  await authService.init();
+
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: authService),
+        ChangeNotifierProvider(create: (_) => AppController()..init()),
+      ],
+      child: const FreshCheckApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FreshCheckApp extends StatelessWidget {
+  const FreshCheckApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'FreshCheck - Analisis Kesegaran Makanan',
-      theme: AppTheme.light,
-      routerConfig: _router,
+    return MaterialApp(
+      title: 'FreshCheck',
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.theme,
+      // Routing berdasarkan status login
+      home: Consumer<AuthService>(
+        builder: (_, auth, __) =>
+          auth.isLoggedIn ? const MainShell() : const LoginScreen(),
+      ),
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ROUTER CONFIGURATION
-// ─────────────────────────────────────────────────────────────────────────────
-
-final GoRouter _router = GoRouter(
-  initialLocation: '/',
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            '404 - Halaman tidak ditemukan',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => context.go('/'),
-            child: const Text('Kembali ke Home'),
-          ),
-        ],
-      ),
-    ),
-  ),
-  routes: [
-    // 🏠 HOME SCREEN
-    GoRoute(
-      path: '/',
-      name: 'home',
-      builder: (context, state) => const HomeScreen(),
-    ),
-
-    // 📷 CAMERA SCREEN
-    GoRoute(
-      path: '/camera',
-      name: 'camera',
-      builder: (context, state) => const CameraScreen(),
-    ),
-
-    // 🖼️ GALLERY SCREEN
-    GoRoute(
-      path: '/gallery',
-      name: 'gallery',
-      builder: (context, state) => const GalleryScreen(),
-    ),
-
-    // 📊 DETAIL SCREEN
-    GoRoute(
-      path: '/detail',
-      name: 'detail',
-      builder: (context, state) {
-        final scan = state.extra as ScanResult;
-        return DetailScreen(scan: scan);
-      },
-    ),
-    
-    // 🗄️ HISTORY SCREEN (✅ TAMBAHAN ROUTE BARU)
-    GoRoute(
-      path: '/history',
-      name: 'history',
-      builder: (context, state) => const HistoryScreen(),
-    ),
-  ],
-);

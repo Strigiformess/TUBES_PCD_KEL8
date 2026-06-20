@@ -9,40 +9,23 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  # State Management
-  flutter_riverpod: ^2.4.0
-  riverpod_annotation: ^2.3.3
-  
-  # Navigation
-  go_router: ^13.0.0
-  
-  # Camera & Image
-  camera: ^0.10.5+9
-  image_picker: ^1.0.0
-  image: ^4.1.7
-  file_picker: ^6.0.0  # ✅ Web + native file picker
-  
-  # ML Kit - Image Labeling
-  google_mlkit_image_labeling: ^0.10.0
-  
-  # TFLite - Custom freshness model (native only)
-  tflite_flutter: ^0.12.1
-  
-  # Local Storage (scan history)
-  hive_flutter: ^1.1.0
+  path: ^1.9.0
+  path_provider: ^2.1.5
+  crypto: ^3.0.3 
+  provider: ^6.1.2
+  mongo_dart: ^0.10.3
   hive: ^2.2.3
-  
-  # Utilities
-  path_provider: ^2.1.2
-  intl: ^0.19.0
-  uuid: ^4.3.3
-  permission_handler: ^11.3.0
-  
-  # UI & Design
-  flutter_animate: ^4.5.0
-  cached_network_image: ^3.3.1
-  shimmer: ^3.0.0
+  hive_flutter: ^1.1.0
+  flutter_dotenv: ^5.1.0
+  connectivity_plus: ^6.0.3
+  flutter_riverpod: ^2.5.1
+  google_fonts: ^6.2.1
+  bcrypt: ^1.1.3
+  uuid: ^4.4.0
+  image: ^4.1.7  
+  # provider: ^6.1.5+1
+  image_picker: ^1.1.2
+  tflite_flutter: ^0.12.1
 
 dev_dependencies:
   flutter_test:
@@ -54,4 +37,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/labels/
+    - .env
+    - assets/label.txt
+    - assets/models/fruit_model.tflite
+    - assets/labels/labels.txt
