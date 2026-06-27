@@ -1,145 +1,72 @@
-
 # 🥦 FreshCheck — Sistem Analisis Tingkat Kesegaran Makanan
 
-> Tugas Besar PCD — Kelompok 8  
-> Topik: Computer Vision berbasis Mobile Edge Intelligence
+> Tugas Besar Pengolahan Citra Digital — Kelompok 8
+> Topik: Mobile Edge Intelligence untuk Deteksi Kesegaran Buah & Sayur
 
 ---
 
-## 📁 Struktur Project
+## 🧠 Cara Kerja Sistem
 
 ```
-freshcheck/
-├── pubspec.yaml
-├── assets/
-│   ├── models/
-│   │   └── freshness_model.tflite      ← taruh model TFLite di sini
-│   └── labels/
-│       └── labels.txt                  ← daftar kelas buah/sayur
-│
-└── lib/
-    ├── main.dart                        ← entry point
-    ├── app.dart                         ← router (go_router)
-    │
-    ├── core/
-    │   ├── config/
-    │   │   └── app_config.dart          ← Single Source of Truth konfigurasi
-    │   └── theme/
-    │       └── app_theme.dart           ← warna, typography, FreshnessStatus
-    │
-    ├── data/
-    │   ├── models/
-    │   │   └── scan_result.dart         ← model data + Hive adapter
-    │   └── repositories/
-    │       └── scan_repository.dart     ← abstraksi penyimpanan lokal
-    │
-    ├── domain/
-    │   └── services/
-    │       ├── ml_service.dart          ← ML Kit + TFLite pipeline
-    │       ├── image_processor.dart     ← YUV→RGB, resize, normalize (Isolate)
-    │       └── camera_service.dart      ← lifecycle-safe CameraController
-    │
-    └── presentation/
-        ├── providers/
-        │   └── scan_provider.dart       ← semua Riverpod providers & notifiers
-        ├── screens/
-        │   ├── home/
-        │   │   ├── home_screen.dart
-        │   │   └── widgets/
-        │   │       └── scan_card.dart
-        │   ├── camera/
-        │   │   └── camera_screen.dart
-        │   └── detail/
-        │       └── detail_screen.dart
-        └── widgets/
-            └── freshness_badge.dart     ← FreshnessBadge + FreshnessScoreBar
+[Foto dari Kamera/Galeri]
+  → [Filter PCD: Grayscale / Gaussian Blur / Sobel Edge / Otsu Thresholding]
+  → [TFLite Model: Binary Classifier Fresh vs Rotten, input 128×128]
+  → [Skor 0–100 + Kategori Fresh/Medium/Rotten]
+  → [Simpan ke Hive (offline-first)]
+  → [Sync ke backend jika online (opsional)]
 ```
 
----
-
-## 🧠 Pipeline ML (sesuai FigJam Bagian 2)
+## 📁 Struktur Proyek
 
 ```
-CameraImage (YUV420)
-      │
-      ▼  [ImageProcessor — di Isolate terpisah]
-  YUV420 → RGB
-      │
-      ▼
-  Resize → 224×224
-      │
-      ▼
-  Normalize [0,255] → [0.0, 1.0]
-      │
-      ▼
-  Float32List tensor [1, 224, 224, 3]
-      │
-      ├──→  Google ML Kit ImageLabeler  → label buah/sayur
-      │
-      └──→  TFLite Interpreter          → skor kesegaran [0,100]
-                                              │
-                                              ▼
-                                         ScanResult
+lib/
+├── main.dart                     ← entry point
+├── app_theme.dart                ← design tokens (warna, typography)
+├── config/app_config.dart        ← baca .env
+├── controller/app_controller.dart ← state management (ChangeNotifier)
+├── model/
+│   ├── history_model.dart        ← data hasil scan (Hive typeId:0)
+│   ├── sync_queue_model.dart     ← antrian sync (Hive typeId:1)
+│   ├── user_model.dart           ← data akun (Hive typeId:2)
+│   └── result_model.dart         ← response dari backend opsional
+├── service/
+│   ├── tflite_service.dart       ← inferensi model on-device
+│   ├── image_filter_service.dart ← 4 filter PCD pixel-level
+│   ├── hive_service.dart         ← CRUD database lokal
+│   ├── sync_service.dart         ← sinkronisasi offline↔online
+│   ├── auth_service.dart         ← login/register (SHA-256)
+│   └── api_service.dart          ← backend opsional (fallback otomatis)
+└── view/
+    ├── main_shell.dart           ← bottom nav: Home/Scanner/History
+    ├── home_tab.dart             ← dashboard + grafik + tips
+    ├── scanner_tab.dart          ← pick foto + filter PCD + analyze
+    ├── history_tab.dart          ← riwayat scan + statistik
+    ├── result_screen.dart        ← halaman hasil analisis
+    ├── login_screen.dart
+    ├── register_screen.dart
+    └── settings_screen.dart
+
+assets/
+├── models/fruit_model.tflite    ← model Binary Classifier (2.8MB)
+└── labels/labels.txt             ← 11 label buah/sayur
 ```
 
----
+## 🚀 Cara Menjalankan
 
-## ⚙️ Setup
+1. Clone repo & masuk ke folder
+2. Salin .env.example ke .env dan sesuaikan
+3. Jalankan: `flutter pub get`
+4. Generate Hive adapters: `flutter pub run build_runner build --delete-conflicting-outputs`
+5. Jalankan di emulator/device: `flutter run`
 
-### 1. Install dependencies
-```bash
-flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
-```
+## 🔧 Tech Stack
 
-### 2. Tambahkan model TFLite
-Taruh file model Anda di:
-```
-assets/models/freshness_model.tflite
-```
-
-Format input yang diharapkan: `[1, 224, 224, 3]` float32  
-Format output: `[1, N_classes]` float32
-
-### 3. Konfigurasi Android (`android/app/build.gradle`)
-```gradle
-android {
-    aaptOptions {
-        noCompress "tflite"
-    }
-}
-```
-
-### 4. Permissions (`android/app/src/main/AndroidManifest.xml`)
-```xml
-<uses-permission android:name="android.permission.CAMERA" />
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-```
-
----
-
-## 🏗️ Arsitektur (SOLID — sesuai FigJam Bagian 3)
-
-| Prinsip | Implementasi |
-|---------|-------------|
-| **S** Single Responsibility | Setiap class punya 1 tugas: `MLService`, `CameraService`, `ImageProcessor` terpisah |
-| **O** Open/Closed | `AppConfig` bisa diperluas tanpa modifikasi class lain |
-| **L** Liskov Substitution | `IScanRepository`, `IMLService` bisa diganti implementasinya |
-| **I** Interface Segregation | Interface kecil & focused |
-| **D** Dependency Inversion | UI bergantung pada abstraksi, bukan implementasi konkret |
-
-**State Management:** Riverpod (`ref.watch`) sebagai Single Source of Truth
-
----
-
-## 📦 Packages Utama
-
-| Package | Kegunaan |
-|---------|---------|
-| `flutter_riverpod` | State management |
-| `google_mlkit_image_labeling` | Deteksi label buah/sayur |
-| `tflite_flutter` | Inferensi model kesegaran |
-| `camera` | Preview & capture kamera |
-| `image` | Preprocessing YUV→RGB |
-| `hive_flutter` | Penyimpanan riwayat scan |
-| `go_router` | Navigasi |
+| Komponen | Package |
+|---|---|
+| State management | provider ^6.1.2 |
+| Database lokal | hive + hive_flutter |
+| ML on-device | tflite_flutter |
+| Ambil foto | image_picker |
+| Image processing (PCD) | image |
+| Deteksi koneksi | connectivity_plus |
+| Hash password | crypto |
