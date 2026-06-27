@@ -10,7 +10,6 @@ import 'model/sync_queue_model.dart';
 import 'service/hive_service.dart';
 import 'model/user_model.dart';          // ← baru
 import 'service/auth_service.dart';      // ← baru
-import 'service/tflite_service.dart';
 import 'view/main_shell.dart';
 import 'view/login_screen.dart';         // ← baru
 

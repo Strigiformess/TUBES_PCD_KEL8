@@ -3,7 +3,6 @@ import '../app_theme.dart';
 import '../widgets/sync_status_widget.dart';
 import 'package:provider/provider.dart';
 
-import '../controller/app_controller.dart';
 import '../service/auth_service.dart';    // ← baru
 import 'home_tab.dart';
 import 'scanner_tab.dart';

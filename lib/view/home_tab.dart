@@ -113,16 +113,6 @@ class _StatsRow extends StatelessWidget {
   final AppController ctrl;
   const _StatsRow({required this.ctrl});
 
-  // Hitung scan hari ini
-  int get _todayCount {
-    final today = DateTime.now();
-    return ctrl.history.where((h) =>
-      h.createdAt.year == today.year &&
-      h.createdAt.month == today.month &&
-      h.createdAt.day == today.day
-    ).length;
-  }
-
   // Persentase fresh
   int get _freshPct {
     if (ctrl.history.isEmpty) return 0;
