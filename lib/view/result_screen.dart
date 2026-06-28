@@ -113,11 +113,11 @@ class ResultScreen extends StatelessWidget {
                 color: AppTheme.red,
               ),
               const SizedBox(height: 12),
-              Row(children: [
-                const Icon(Icons.memory_outlined, size: 13, color: AppTheme.textSecondary),
-                const SizedBox(width: 5),
+              const Row(children: [
+                Icon(Icons.memory_outlined, size: 13, color: AppTheme.textSecondary),
+                SizedBox(width: 5),
                 Text('On-device inference via TFLite',
-                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
               ]),
             ]),
           ),

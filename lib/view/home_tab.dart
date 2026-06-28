@@ -366,7 +366,7 @@ class _TipCard extends StatelessWidget {
       Container(
         width: 40, height: 40,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(icon, color: Colors.white, size: 20),
@@ -378,7 +378,7 @@ class _TipCard extends StatelessWidget {
         )),
         const SizedBox(height: 4),
         Text(body, style: TextStyle(
-          color: Colors.white.withOpacity(0.85), fontSize: 12, height: 1.5,
+          color: Colors.white.withValues(alpha: 0.85), fontSize: 12, height: 1.5,
         )),
       ])),
     ]),

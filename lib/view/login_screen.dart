@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 36),
 
             // ── Form ──
-            _Label('Email'),
+            const _Label('Email'),
             const SizedBox(height: 6),
             _Field(
               controller: _emailCtrl,
@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 16),
 
-            _Label('Password'),
+            const _Label('Password'),
             const SizedBox(height: 6),
             _Field(
               controller: _passwordCtrl,
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.green,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppTheme.green.withOpacity(0.4),
+                  disabledBackgroundColor: AppTheme.green.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
                 ),

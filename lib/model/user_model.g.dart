@@ -1,7 +1,10 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
 
 part of 'user_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
 
 class UserModelAdapter extends TypeAdapter<UserModel> {
   @override
@@ -26,12 +29,20 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
   void write(BinaryWriter writer, UserModel obj) {
     writer
       ..writeByte(5)
-      ..writeByte(0)..write(obj.id)
-      ..writeByte(1)..write(obj.name)
-      ..writeByte(2)..write(obj.email)
-      ..writeByte(3)..write(obj.passwordHash)
-      ..writeByte(4)..write(obj.createdAt);
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.email)
+      ..writeByte(3)
+      ..write(obj.passwordHash)
+      ..writeByte(4)
+      ..write(obj.createdAt);
   }
+
+  @override
+  int get hashCode => typeId.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -39,7 +50,4 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       other is UserModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
-
-  @override
-  int get hashCode => typeId.hashCode;
 }

@@ -48,8 +48,8 @@ class HistoryTab extends StatelessWidget {
       ),
 
       // ── List header ──
-      Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      const Padding(
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
         child: SectionHeader('Recent Scans'),
       ),
 

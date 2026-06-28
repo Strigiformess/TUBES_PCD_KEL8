@@ -82,7 +82,7 @@ class ScannerTab extends StatelessWidget {
               child: Container(
                 margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.35),
+                  color: Colors.black.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Center(
@@ -105,7 +105,7 @@ class ScannerTab extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.55),
+                  color: Colors.black.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Row(children: [
@@ -177,7 +177,7 @@ class ScannerTab extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.green,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: AppTheme.green.withOpacity(0.35),
+                disabledBackgroundColor: AppTheme.green.withValues(alpha: 0.35),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 elevation: 0,

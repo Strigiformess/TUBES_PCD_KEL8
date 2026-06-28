@@ -20,10 +20,12 @@ class TfliteResult {
   });
 
   String get pesan {
-    if (kategori == 'Fresh')
+    if (kategori == 'Fresh') {
       return 'Buah dalam kondisi segar. Aman dikonsumsi.';
-    if (kategori == 'Medium')
+    }
+    if (kategori == 'Medium') {
       return 'Buah mulai kurang segar. Segera dikonsumsi.';
+    }
     return 'Buah menunjukkan tanda kerusakan. Tidak disarankan dikonsumsi.';
   }
 }

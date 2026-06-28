@@ -77,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             const SizedBox(height: 28),
 
-            _Label('Nama Lengkap'),
+            const _Label('Nama Lengkap'),
             const SizedBox(height: 6),
             _Field(
               controller: _nameCtrl,
@@ -87,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             const SizedBox(height: 14),
 
-            _Label('Email'),
+            const _Label('Email'),
             const SizedBox(height: 6),
             _Field(
               controller: _emailCtrl,
@@ -98,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             const SizedBox(height: 14),
 
-            _Label('Password'),
+            const _Label('Password'),
             const SizedBox(height: 6),
             _Field(
               controller: _passwordCtrl,
@@ -116,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             const SizedBox(height: 14),
 
-            _Label('Konfirmasi Password'),
+            const _Label('Konfirmasi Password'),
             const SizedBox(height: 6),
             _Field(
               controller: _confirmCtrl,
@@ -152,7 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.green,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppTheme.green.withOpacity(0.4),
+                  disabledBackgroundColor: AppTheme.green.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
                 ),
